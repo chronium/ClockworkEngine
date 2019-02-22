@@ -34,9 +34,19 @@ case class Model[A, B](buffer: FloatBuffer, indices: Array[Short])(setAttribs: =
 class VertexColorModel(buffer: FloatBuffer, indices: Array[Short]) extends Model[Unit, Unit](buffer, indices)({
   ColoredVertex setPositionAttribPointer 0
   ColoredVertex setColorAttribPointer 1
-}) ({
+})({
   GL20 glEnableVertexAttribArray 0
   GL20 glEnableVertexAttribArray 1
+})
+
+class VertexColorTextureModel(buffer: FloatBuffer, indices: Array[Short]) extends Model[Unit, Unit](buffer, indices)({
+  ColoredTexturedVertex setPositionAttribPointer 0
+  ColoredTexturedVertex setColorAttribPointer 1
+  ColoredTexturedVertex setTextureAttribPointer 2
+})({
+  GL20 glEnableVertexAttribArray 0
+  GL20 glEnableVertexAttribArray 1
+  GL20 glEnableVertexAttribArray 2
 })
 
 object Model {

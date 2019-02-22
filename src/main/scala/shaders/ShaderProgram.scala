@@ -60,6 +60,10 @@ case class ShaderProgramHandle(shaders: Array[Int], handle: Int) {
     shaders.foreach(shader => GL20 glDeleteShader shader)
     GL20 glDeleteProgram handle
   }
+
+  def setUniform(uniform: String, value: Int): Unit = {
+    GL20 glUniform1i(handle, value)
+  }
 }
 
 trait ShaderType {
@@ -86,13 +90,15 @@ trait ShaderType {
 case object VertexShader extends ShaderType {
   override def getGLType: Int = GL20 GL_VERTEX_SHADER
 }
+
 case object FragmentShader extends ShaderType {
   override def getGLType: Int = GL20 GL_FRAGMENT_SHADER
 }
 
 trait ShaderTrait {
   def createShader(): ShaderProgram = ShaderProgram(GL20 glCreateProgram)
-  def apply (shaders: Int*): ShaderProgram = {
+
+  def apply(shaders: Int*): ShaderProgram = {
     val handle = createShader()
     handle attachShaders shaders
     handle

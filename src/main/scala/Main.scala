@@ -7,6 +7,7 @@ import org.lwjgl.opengl.GL11._
 import org.lwjgl.system.MemoryStack._
 import org.lwjgl.system.MemoryUtil._
 import shaders.{FragmentShader, ShaderProgram, ShaderProgramHandle, VertexShader}
+import textures.{Texture2D, TextureHandle}
 
 object Main {
   val WIDTH = 800
@@ -59,14 +60,17 @@ object Main {
   def loop(): Unit = {
     GL createCapabilities()
 
-    setupQuad()
+    setupTexturedQuad()
 
     glClearColor(100.0f / 255.0f, 149.0f / 255.0f, 237.0f / 255.0f, 0.0f)
 
     while (!glfwWindowShouldClose(Main.window)) {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-      shader bind model.render
+      shader bind {
+        shader setUniform("tex", texture handle)
+        texture bind model.render
+      }
 
       glfwSwapBuffers(Main.window)
       glfwPollEvents()
@@ -84,10 +88,11 @@ object Main {
     glfwSetErrorCallback(null).free()
   }
 
-  var model: VertexColorModel = _
+  var model: Model[Unit, Unit] = _
   var shader: ShaderProgramHandle = _
+  var texture: TextureHandle = _
 
-  def setupQuad(): Unit = {
+  def setupColoredQuad(): Unit = {
     val interleavedBuffer = ColoredVertex createVertexBuffer(
       new ColoredVertex setXYZ(-.5f, .5f, 0) setRGBA(1, 0, 0, 1),
       new ColoredVertex setXYZ(-.5f, -.5f, 0) setRGBA(0, 1, 0, 1),
@@ -103,6 +108,27 @@ object Main {
     val vert = VertexShader |:| "Assets/Shaders/passthrough.vs"
     val frag = FragmentShader |:| "Assets/Shaders/passthrough.fs"
 
-    shader = ShaderProgram (vert, frag) bindAttribLocations ((0, "vPos"), (1, "vColor")) build
+    shader = ShaderProgram(vert, frag) bindAttribLocations((0, "vPos"), (1, "vColor")) build
+  }
+
+  def setupTexturedQuad(): Unit = {
+    val buffer = ColoredTexturedVertex createVertexBuffer(
+      new ColoredTexturedVertex setXYZ(-.5f, .5f, 0) setRGBA(1, 0, 0, 1) setST(0, 1),
+      new ColoredTexturedVertex setXYZ(-.5f, -.5f, 0) setRGBA(0, 1, 0, 1) setST(0, 0),
+      new ColoredTexturedVertex setXYZ(.5f, -.5f, 0) setRGBA(0, 0, 1, 1) setST(1, 0),
+      new ColoredTexturedVertex setXYZ(.5f, .5f, 0) setRGBA(1, 1, 1, 1) setST(1, 1))
+
+    val indices = Array[Short](
+      0, 1, 2,
+      2, 3, 0)
+
+    model = new VertexColorTextureModel(buffer, indices)
+
+    texture = Texture2D createTexture2D "Assets/Textures/WoodFloor22_col.jpg"
+
+    val vert = VertexShader |:| "Assets/Shaders/vsTextured.glsl"
+    val frag = FragmentShader |:| "Assets/Shaders/fsTextured.glsl"
+
+    shader = ShaderProgram(vert, frag) bindAttribLocations((0, "vPos"), (1, "vColor")) build
   }
 }
