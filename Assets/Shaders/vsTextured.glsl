@@ -7,8 +7,11 @@ layout (location=2) in vec2 vTexCoord;
 out vec4 fColor;
 out vec2 fTexCoord;
 
+uniform mat4 worldMatrix;
+uniform mat4 projectionMatrix;
+
 void main() {
-    gl_Position = vPos;
+    gl_Position = projectionMatrix * worldMatrix * vPos;
     fColor = vColor;
     fTexCoord = vTexCoord;
 }

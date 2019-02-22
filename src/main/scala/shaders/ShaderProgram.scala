@@ -1,8 +1,12 @@
 package shaders
 
-import org.lwjgl.opengl
+import java.nio.FloatBuffer
+
+import org.joml.Matrix4f
+import org.lwjgl.system.MemoryStack._
 import org.lwjgl.opengl.{GL11, GL20}
 
+import scala.collection.mutable
 import scala.io.Source
 
 case class ShaderProgram(handle: Int) {
@@ -49,6 +53,8 @@ case class ShaderProgram(handle: Int) {
 }
 
 case class ShaderProgramHandle(shaders: Array[Int], handle: Int) {
+  val uniforms: mutable.HashMap[String, Int] = new mutable.HashMap[String, Int]()
+
   def bind[T](body: => T): Unit = {
     GL20 glUseProgram handle
     try body finally GL20 glUseProgram 0
@@ -62,7 +68,23 @@ case class ShaderProgramHandle(shaders: Array[Int], handle: Int) {
   }
 
   def setUniform(uniform: String, value: Int): Unit = {
-    GL20 glUniform1i(handle, value)
+    if (!uniforms.contains(uniform))
+      uniforms += (uniform -> GL20.glGetUniformLocation(handle, uniform))
+    GL20 glUniform1i(uniforms(uniform), value)
+  }
+
+  def setUniform(uniform: String, value: Matrix4f): Unit = {
+    if (!uniforms.contains(uniform))
+      uniforms += (uniform -> GL20.glGetUniformLocation(handle, uniform))
+
+    val stack = stackPush
+
+    val fb: FloatBuffer = stack mallocFloat 16
+    value.get(fb)
+
+    GL20 glUniformMatrix4fv(uniforms(uniform), false, fb)
+
+    stackPop
   }
 }
 

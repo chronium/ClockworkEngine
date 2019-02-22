@@ -1,3 +1,4 @@
+import org.joml.{Matrix4f, Vector3f}
 import org.lwjgl.BufferUtils
 import org.lwjgl.glfw._
 import org.lwjgl.opengl._
@@ -14,6 +15,7 @@ object Main {
   val HEIGHT = 600
 
   var window: Long = _
+  var projection: Matrix4f = _
 
   def main(args: Array[String]): Unit = {
     run()
@@ -55,6 +57,8 @@ object Main {
     glfwSwapInterval(1)
 
     glfwShowWindow(Main.window)
+
+    projection = new Matrix4f perspective(Transform.FOV, pWidth.get(0).toFloat / pHeight.get(0).toFloat, Transform.Z_NEAR, Transform.Z_FAR)
   }
 
   def loop(): Unit = {
@@ -68,7 +72,9 @@ object Main {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
       shader bind {
-        shader setUniform("tex", texture handle)
+        shader setUniform("tex", 0)
+        shader setUniform("projectionMatrix", projection)
+        shader setUniform("worldMatrix", transform worldMatrix)
         texture bind model.render
       }
 
@@ -91,6 +97,7 @@ object Main {
   var model: Model[Unit, Unit] = _
   var shader: ShaderProgramHandle = _
   var texture: TextureHandle = _
+  var transform: Transform = new Transform(position = new Vector3f(0, 0, -1))
 
   def setupColoredQuad(): Unit = {
     val interleavedBuffer = ColoredVertex createVertexBuffer(
@@ -113,10 +120,10 @@ object Main {
 
   def setupTexturedQuad(): Unit = {
     val buffer = ColoredTexturedVertex createVertexBuffer(
-      new ColoredTexturedVertex setXYZ(-.5f, .5f, 0) setRGBA(1, 0, 0, 1) setST(0, 1),
-      new ColoredTexturedVertex setXYZ(-.5f, -.5f, 0) setRGBA(0, 1, 0, 1) setST(0, 0),
-      new ColoredTexturedVertex setXYZ(.5f, -.5f, 0) setRGBA(0, 0, 1, 1) setST(1, 0),
-      new ColoredTexturedVertex setXYZ(.5f, .5f, 0) setRGBA(1, 1, 1, 1) setST(1, 1))
+      new ColoredTexturedVertex setXYZ(-.5f, .5f, 0f) setRGBA(1, 0, 0, 1) setST(0, 1),
+      new ColoredTexturedVertex setXYZ(-.5f, -.5f, 0f) setRGBA(0, 1, 0, 1) setST(0, 0),
+      new ColoredTexturedVertex setXYZ(.5f, -.5f, 0f) setRGBA(0, 0, 1, 1) setST(1, 0),
+      new ColoredTexturedVertex setXYZ(.5f, .5f, 0f) setRGBA(1, 1, 1, 1) setST(1, 1))
 
     val indices = Array[Short](
       0, 1, 2,

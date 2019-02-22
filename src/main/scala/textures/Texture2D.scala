@@ -3,7 +3,7 @@ package textures
 import java.nio.{ByteBuffer, IntBuffer}
 
 import org.lwjgl.system.MemoryStack._
-import org.lwjgl.opengl.{GL11, GL45}
+import org.lwjgl.opengl.{GL11, GL12, GL45}
 import org.lwjgl.stb.STBImage._
 
 case class TextureHandle(handle: Int, target: Int) {
@@ -30,6 +30,9 @@ object Texture2D {
 
     GL45 glTextureParameteri(handle, GL11 GL_TEXTURE_MIN_FILTER, GL11 GL_LINEAR_MIPMAP_LINEAR)
     GL45 glTextureParameteri(handle, GL11 GL_TEXTURE_MAG_FILTER, GL11 GL_LINEAR)
+
+    GL45 glTextureParameteri(handle, GL11 GL_TEXTURE_WRAP_S, GL12 GL_CLAMP_TO_EDGE)
+    GL45 glTextureParameteri(handle, GL11 GL_TEXTURE_WRAP_T, GL12 GL_CLAMP_TO_EDGE)
 
     TextureHandle(handle, GL11 GL_TEXTURE_2D)
   }
