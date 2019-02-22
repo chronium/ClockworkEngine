@@ -17,6 +17,8 @@ object Main {
   var window: Long = _
   var projection: Matrix4f = _
 
+  val inputManager: InputManager = new InputManager
+
   def main(args: Array[String]): Unit = {
     run()
   }
@@ -37,9 +39,16 @@ object Main {
     }
 
     glfwSetKeyCallback(Main.window, (_, key, _, action, _) => {
-      if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
-        glfwSetWindowShouldClose(Main.window, true)
+      action match {
+        case GLFW_PRESS => inputManager.keyPressed(key)
+        case GLFW_RELEASE => inputManager.keyReleased(key)
+        case _ =>
+      }
     })
+
+    inputManager.onKeyUp(GLFW_KEY_ESCAPE) {
+      glfwSetWindowShouldClose(Main.window, true)
+    }
 
     val stack = stackPush
     val pWidth = stack mallocInt 1
