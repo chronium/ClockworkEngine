@@ -1,3 +1,5 @@
+import graph.components.RenderComponent
+import graph.{Entity, SceneGraph}
 import org.joml.{Matrix4f, Vector3f}
 import org.lwjgl.glfw.Callbacks._
 import org.lwjgl.glfw.GLFW._
@@ -12,12 +14,14 @@ object Main extends Clockwork {
   var projection: Matrix4f = _
   var clockworkEngine: ClockworkEngine = _
 
+  var sceneGraph: SceneGraph = _
+
   def main(args: Array[String]): Unit = {
     clockworkEngine = new ClockworkEngine(this, "ClockworkEngine", WIDTH, HEIGHT)
     clockworkEngine start()
   }
 
-  def init(): Unit = {
+  override def init(): Unit = {
     InputManager.onKeyUp(GLFW_KEY_ESCAPE) {
       clockworkEngine.window.shouldClose = true
     }
@@ -26,6 +30,18 @@ object Main extends Clockwork {
     setupTexturedQuad()
 
     glClearColor(100.0f / 255.0f, 149.0f / 255.0f, 237.0f / 255.0f, 0.0f)
+
+    sceneGraph = new SceneGraph
+
+    class TestEntity extends Entity {
+    }
+
+    val entity = new TestEntity()
+    entity.components += new RenderComponent
+
+    entity[RenderComponent].get render()
+
+    sceneGraph += entity
   }
 
   override def render(window: Window): Unit = {
