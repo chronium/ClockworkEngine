@@ -55,4 +55,4 @@ trait Keyboard {
   def wasKeyPressed(key: Int): Boolean = oldKeys(key) && !keys(key)
 }
 
-class InputManager extends Keyboard
+object InputManager extends Keyboard

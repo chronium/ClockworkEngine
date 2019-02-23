@@ -3,11 +3,18 @@ package textures
 import java.nio.{ByteBuffer, IntBuffer}
 
 import org.lwjgl.system.MemoryStack._
-import org.lwjgl.opengl.{GL11, GL12, GL45}
+import org.lwjgl.opengl.{GL11, GL12, GL13, GL45}
 import org.lwjgl.stb.STBImage._
 
-case class TextureHandle(handle: Int, target: Int) {
+case class TextureHandle(width: Int, height: Int)(handle: Int, target: Int) {
   def bind[T](body: => T): Unit = {
+    GL13 glActiveTexture (GL13 GL_TEXTURE0)
+    GL11 glBindTexture(target, handle)
+    try body finally GL11 glBindTexture(target, 0)
+  }
+
+  def bind[T](texture: Int)(body: => T): Unit = {
+    GL13 glActiveTexture ((GL13 GL_TEXTURE0) + texture)
     GL11 glBindTexture(target, handle)
     try body finally GL11 glBindTexture(target, 0)
   }
@@ -34,7 +41,7 @@ object Texture2D {
     GL45 glTextureParameteri(handle, GL11 GL_TEXTURE_WRAP_S, GL12 GL_CLAMP_TO_EDGE)
     GL45 glTextureParameteri(handle, GL11 GL_TEXTURE_WRAP_T, GL12 GL_CLAMP_TO_EDGE)
 
-    TextureHandle(handle, GL11 GL_TEXTURE_2D)
+    TextureHandle(width, height)(handle, GL11 GL_TEXTURE_2D)
   }
 
   def loadImage(path: String): (ByteBuffer, Int, Int) = {

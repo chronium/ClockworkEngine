@@ -1,103 +1,49 @@
 import org.joml.{Matrix4f, Vector3f}
-import org.lwjgl.BufferUtils
-import org.lwjgl.glfw._
-import org.lwjgl.opengl._
 import org.lwjgl.glfw.Callbacks._
 import org.lwjgl.glfw.GLFW._
 import org.lwjgl.opengl.GL11._
-import org.lwjgl.system.MemoryStack._
-import org.lwjgl.system.MemoryUtil._
 import shaders.{FragmentShader, ShaderProgram, ShaderProgramHandle, VertexShader}
 import textures.{Texture2D, TextureHandle}
 
-object Main {
+object Main extends Clockwork {
   val WIDTH = 800
   val HEIGHT = 600
 
-  var window: Long = _
   var projection: Matrix4f = _
-
-  val inputManager: InputManager = new InputManager
+  var clockworkEngine: ClockworkEngine = _
 
   def main(args: Array[String]): Unit = {
-    run()
+    clockworkEngine = new ClockworkEngine(this, "ClockworkEngine", WIDTH, HEIGHT)
+    clockworkEngine start()
   }
 
   def init(): Unit = {
-    GLFWErrorCallback createPrint System.err set()
-
-    if (!glfwInit)
-      throw new IllegalStateException("Unable to initialize GLFW")
-
-    glfwDefaultWindowHints()
-    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE)
-
-    Main.window = glfwCreateWindow(WIDTH, HEIGHT, "Test window", NULL, NULL)
-    if (Main.window == NULL) {
-      throw new RuntimeException("Failed to create the GLFW window")
+    InputManager.onKeyUp(GLFW_KEY_ESCAPE) {
+      clockworkEngine.window.shouldClose = true
     }
 
-    glfwSetKeyCallback(Main.window, (_, key, _, action, _) => {
-      action match {
-        case GLFW_PRESS => inputManager.keyPressed(key)
-        case GLFW_RELEASE => inputManager.keyReleased(key)
-        case _ =>
-      }
-    })
-
-    inputManager.onKeyUp(GLFW_KEY_ESCAPE) {
-      glfwSetWindowShouldClose(Main.window, true)
-    }
-
-    val stack = stackPush
-    val pWidth = stack mallocInt 1
-    val pHeight = stack mallocInt 1
-
-    glfwGetWindowSize(Main.window, pWidth, pHeight)
-
-    val vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor())
-
-    glfwSetWindowPos(Main.window, (vidmode.width() - pWidth.get(0)) / 2, (vidmode.height() - pHeight.get(0)) / 2)
-    stackPop
-
-    glfwMakeContextCurrent(Main.window)
-
-    glfwSwapInterval(1)
-
-    glfwShowWindow(Main.window)
-
-    projection = new Matrix4f perspective(Transform.FOV, pWidth.get(0).toFloat / pHeight.get(0).toFloat, Transform.Z_NEAR, Transform.Z_FAR)
-  }
-
-  def loop(): Unit = {
-    GL createCapabilities()
-
+    projection = new Matrix4f perspective(Transform.FOV, WIDTH.toFloat / HEIGHT.toFloat, Transform.Z_NEAR, Transform.Z_FAR)
     setupTexturedQuad()
 
     glClearColor(100.0f / 255.0f, 149.0f / 255.0f, 237.0f / 255.0f, 0.0f)
+  }
 
-    while (!glfwWindowShouldClose(Main.window)) {
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+  override def render(window: Window): Unit = {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-      shader bind {
-        shader setUniform("tex", 0)
-        shader setUniform("projectionMatrix", projection)
-        shader setUniform("worldMatrix", transform worldMatrix)
-        texture bind model.render
-      }
-
-      glfwSwapBuffers(Main.window)
-      glfwPollEvents()
+    shader bind {
+      shader setUniform("tex", 0)
+      shader setUniform("projectionMatrix", projection)
+      shader setUniform("worldMatrix", transform worldMatrix)
+      texture bind model.render
     }
   }
 
-  def run(): Unit = {
-    init()
-    loop()
+  override def update(deltaTime: Float): Unit = {}
 
-    glfwFreeCallbacks(Main.window)
-    glfwDestroyWindow(Main.window)
+  def terminate(): Unit = {
+    glfwFreeCallbacks(clockworkEngine.window.handle)
+    glfwDestroyWindow(clockworkEngine.window.handle)
 
     glfwTerminate()
     glfwSetErrorCallback(null).free()
