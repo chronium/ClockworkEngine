@@ -1,12 +1,13 @@
 import Model._
 import Transform.Transform
 import VertexTraits.{ColoredTexturedVertex, ColoredVertex}
-import graph.components.{RenderComponent, TransformComponent}
+import graph.components.RenderComponent
 import graph.{Entity, SceneGraph}
 import org.joml.{Matrix4f, Vector3f}
 import org.lwjgl.glfw.Callbacks._
 import org.lwjgl.glfw.GLFW._
 import org.lwjgl.opengl.GL11._
+import org.lwjgl.opengl.GL11
 import shaders.{FragmentShader, ShaderProgram, ShaderProgramHandle, VertexShader}
 import textures.{Texture2D, TextureHandle}
 
@@ -19,6 +20,8 @@ object Main extends Clockwork {
 
   var sceneGraph: SceneGraph = _
 
+  var wireframe: Boolean = false
+
   def main(args: Array[String]): Unit = {
     clockworkEngine = new ClockworkEngine(this, "ClockworkEngine", WIDTH, HEIGHT)
     clockworkEngine start()
@@ -28,6 +31,17 @@ object Main extends Clockwork {
     InputManager.onKeyUp(GLFW_KEY_ESCAPE) {
       clockworkEngine.window.shouldClose = true
     }
+
+    InputManager.onKeyPressed(GLFW_KEY_F5) {
+      wireframe = !wireframe
+
+      if (wireframe)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+      else
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+    }
+
+    glCullFace(GL_BACK)
 
     projection = new Matrix4f perspective(Transform.FOV, WIDTH.toFloat / HEIGHT.toFloat, Transform.Z_NEAR, Transform.Z_FAR)
     setupTexturedQuad()
@@ -41,9 +55,8 @@ object Main extends Clockwork {
 
     val entity = new TestEntity()
     entity :< new RenderComponent
-    entity :< new TransformComponent
     entity[RenderComponent].get.model = model
-    entity[TransformComponent].get.transform = transform
+    entity.transform = transform
 
     sceneGraph += entity
   }
@@ -54,7 +67,6 @@ object Main extends Clockwork {
     shader bind {
       shader setUniform("tex", 0)
       shader setUniform("projectionMatrix", projection)
-      shader setUniform("worldMatrix", transform worldMatrix)
       texture bind {
         for (renderable <- sceneGraph.get[RenderComponent])
           renderable.render(shader)

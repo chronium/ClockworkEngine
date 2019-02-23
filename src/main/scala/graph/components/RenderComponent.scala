@@ -9,7 +9,7 @@ class RenderComponent extends EntityComponent {
 
   def render(shader: ShaderProgramHandle): Unit = {
     if (model != null) {
-      entity[TransformComponent].get.setUniform(shader)
+      shader.setUniform("worldMatrix", entity.transform.worldMatrix)
       model render()
     }
   }
