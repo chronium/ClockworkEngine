@@ -1,6 +1,7 @@
 package graph
 
 import scala.collection.mutable.ArrayBuffer
+import scala.reflect.ClassTag
 
 trait Entity {
   private var _children: ArrayBuffer[Entity] = new ArrayBuffer[Entity]
@@ -15,7 +16,12 @@ trait Entity {
 
   def components_=(components: ArrayBuffer[EntityComponent]): Unit = _components = components
 
-  def apply[T <: EntityComponent]: Option[T] = {
+  def :<(component: EntityComponent): Unit = {
+    component.entity = this
+    components += component
+  }
+
+  def apply[T <: EntityComponent : ClassTag]: Option[T] = {
     for (comp <- components) {
       comp match {
         case t: T => return Some(t)

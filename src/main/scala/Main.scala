@@ -1,4 +1,7 @@
-import graph.components.RenderComponent
+import Model._
+import Transform.Transform
+import VertexTraits.{ColoredTexturedVertex, ColoredVertex}
+import graph.components.{RenderComponent, TransformComponent}
 import graph.{Entity, SceneGraph}
 import org.joml.{Matrix4f, Vector3f}
 import org.lwjgl.glfw.Callbacks._
@@ -37,9 +40,10 @@ object Main extends Clockwork {
     }
 
     val entity = new TestEntity()
-    entity.components += new RenderComponent
-
-    entity[RenderComponent].get render()
+    entity :< new RenderComponent
+    entity :< new TransformComponent
+    entity[RenderComponent].get.model = model
+    entity[TransformComponent].get.transform = transform
 
     sceneGraph += entity
   }
@@ -51,7 +55,10 @@ object Main extends Clockwork {
       shader setUniform("tex", 0)
       shader setUniform("projectionMatrix", projection)
       shader setUniform("worldMatrix", transform worldMatrix)
-      texture bind model.render
+      texture bind {
+        for (renderable <- sceneGraph.get[RenderComponent])
+          renderable.render(shader)
+      }
     }
   }
 

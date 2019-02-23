@@ -1,4 +1,6 @@
-import org.lwjgl.opengl.{GL21, GL30}
+package VAOHandle
+
+import org.lwjgl.opengl.GL30
 
 case class VAOHandle(handle: Int) {
   def bind[T](body: => T): Unit = {

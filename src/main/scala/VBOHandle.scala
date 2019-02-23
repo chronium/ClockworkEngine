@@ -1,4 +1,6 @@
-import org.lwjgl.opengl.{GL15, GL30}
+package VBOHandlle
+
+import org.lwjgl.opengl.GL15
 
 case class VBOHandle(handle: Int, bufType: Int) {
   def bind[T](body: => T): Unit = {

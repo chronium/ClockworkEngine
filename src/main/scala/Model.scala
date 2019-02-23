@@ -1,5 +1,10 @@
+package Model
+
 import java.nio.{FloatBuffer, ShortBuffer}
 
+import VAOHandle.VAOHandle
+import VBOHandlle.VBOHandle
+import VertexTraits.{ColoredTexturedVertex, ColoredVertex}
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.{GL11, GL15, GL20, GL45}
 
