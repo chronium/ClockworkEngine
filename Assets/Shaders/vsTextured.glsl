@@ -9,9 +9,10 @@ out vec2 fTexCoord;
 
 uniform mat4 worldMatrix;
 uniform mat4 projectionMatrix;
+uniform mat4 viewMatrix;
 
 void main() {
-    gl_Position = projectionMatrix * worldMatrix * vPos;
+    gl_Position = projectionMatrix * viewMatrix * worldMatrix * vPos;
     fColor = vColor;
     fTexCoord = vTexCoord;
 }

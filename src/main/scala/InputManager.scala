@@ -1,3 +1,5 @@
+import org.joml.Vector2f
+
 import scala.collection.mutable
 
 trait Keyboard {
@@ -48,11 +50,24 @@ trait Keyboard {
     onKeyPressedEvents.addBinding(key, _ => body)
   }
 
-  def isKeyDown(key: Int): Boolean = keys(key)
+  def isKeyDown(key: Int): Boolean = keys getOrElseUpdate(key, false)
 
   def isKeyUp(key: Int): Boolean = !keys(key)
 
   def wasKeyPressed(key: Int): Boolean = oldKeys(key) && !keys(key)
 }
 
-object InputManager extends Keyboard
+trait Mouse {
+  self =>
+
+  val _mousePosition: Vector2f = new Vector2f
+
+  def mousePosition: Vector2f = _mousePosition
+
+  def mousePosition_=(pos: Vector2f): Unit = {
+    _mousePosition.x = pos.x
+    _mousePosition.y = pos.y
+  }
+}
+
+object InputManager extends Keyboard with Mouse

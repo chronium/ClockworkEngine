@@ -1,9 +1,10 @@
+import Camera.Camera
 import Model._
 import Transform.Transform
 import VertexTraits.{ColoredTexturedVertex, ColoredVertex}
 import graph.components.RenderComponent
 import graph.{Entity, SceneGraph}
-import org.joml.{Matrix4f, Vector3f}
+import org.joml.{Matrix4f, Vector2f, Vector3f}
 import org.lwjgl.glfw.Callbacks._
 import org.lwjgl.glfw.GLFW._
 import org.lwjgl.opengl.GL11._
@@ -21,6 +22,8 @@ object Main extends Clockwork {
   var sceneGraph: SceneGraph = _
 
   var wireframe: Boolean = false
+
+  var camera: Camera = new Camera
 
   def main(args: Array[String]): Unit = {
     clockworkEngine = new ClockworkEngine(this, "ClockworkEngine", WIDTH, HEIGHT)
@@ -40,6 +43,10 @@ object Main extends Clockwork {
       else
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
     }
+
+    glfwSetCursorPosCallback(clockworkEngine.window.handle, (_, xpos, ypos) => {
+      InputManager.mousePosition = new Vector2f(xpos toFloat, ypos toFloat)
+    })
 
     glCullFace(GL_BACK)
 
@@ -67,6 +74,7 @@ object Main extends Clockwork {
     shader bind {
       shader setUniform("tex", 0)
       shader setUniform("projectionMatrix", projection)
+      shader setUniform("viewMatrix", camera.transform.cameraMatrix)
       texture bind {
         for (renderable <- sceneGraph.get[RenderComponent])
           renderable.render(shader)
@@ -74,7 +82,41 @@ object Main extends Clockwork {
     }
   }
 
-  override def update(deltaTime: Float): Unit = {}
+  var mouseSpeed: Float = 15f
+
+  override def update(deltaTime: Float): Unit = {
+    val move = new Vector3f(0)
+
+    if (InputManager.isKeyDown(GLFW_KEY_W))
+      move.z = -1 * deltaTime
+    else if (InputManager.isKeyDown(GLFW_KEY_S))
+      move.z = 1 * deltaTime
+
+    if (InputManager.isKeyDown(GLFW_KEY_A))
+      move.x = -1 * deltaTime
+    else if (InputManager.isKeyDown(GLFW_KEY_D))
+      move.x = 1 * deltaTime
+
+    val deltaY = InputManager.mousePosition.y - 300
+    val deltaX = InputManager.mousePosition.x - 400
+
+    camera.transform.rotation.x += deltaY * deltaTime * mouseSpeed
+    camera.transform.rotation.y += deltaX * deltaTime * mouseSpeed
+
+    if (camera.transform.rotation.x >= 90f)
+      camera.transform.rotation.x = 90f
+    if (camera.transform.rotation.x <= -90f)
+      camera.transform.rotation.x = -90f
+
+    if (camera.transform.rotation.y >= 360f)
+      camera.transform.rotation.y = 360f
+    if (camera.transform.rotation.y <= -360f)
+      camera.transform.rotation.y = -360f
+
+    camera.move(move)
+
+    glfwSetCursorPos(clockworkEngine.window.handle, (WIDTH / 2).toDouble, (HEIGHT / 2).toDouble)
+  }
 
   def terminate(): Unit = {
     glfwFreeCallbacks(clockworkEngine.window.handle)
