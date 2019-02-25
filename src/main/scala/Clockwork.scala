@@ -19,6 +19,7 @@ class ClockworkEngine(clockwork: Clockwork, title: String, width: Int, height: I
   def init(): Unit = {
     window init()
     timer init()
+    InputManager.window = window.handle
     clockwork init()
   }
 

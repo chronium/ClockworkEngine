@@ -22,6 +22,7 @@ object Main extends Clockwork {
   var sceneGraph: SceneGraph = _
 
   var wireframe: Boolean = false
+  var lockMouse: Boolean = false
 
   var camera: Camera = new Camera
 
@@ -44,11 +45,20 @@ object Main extends Clockwork {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
     }
 
-    glfwSetCursorPosCallback(clockworkEngine.window.handle, (_, xpos, ypos) => {
-      InputManager.mousePosition = new Vector2f(xpos toFloat, ypos toFloat)
-    })
+    InputManager.onKeyPressed(GLFW_KEY_F6) {
+      lockMouse = !lockMouse
+
+      if (lockMouse) {
+        glfwSetCursorPos(clockworkEngine.window.handle, (WIDTH / 2).toDouble, (HEIGHT / 2).toDouble)
+        glfwSetInputMode(clockworkEngine.window.handle, GLFW_CURSOR, GLFW_CURSOR_HIDDEN)
+      }
+      else {
+        glfwSetInputMode(clockworkEngine.window.handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL)
+      }
+    }
 
     glCullFace(GL_BACK)
+    glEnable(GL_CULL_FACE)
 
     projection = new Matrix4f perspective(Transform.FOV, WIDTH.toFloat / HEIGHT.toFloat, Transform.Z_NEAR, Transform.Z_FAR)
     setupTexturedQuad()
@@ -88,34 +98,41 @@ object Main extends Clockwork {
     val move = new Vector3f(0)
 
     if (InputManager.isKeyDown(GLFW_KEY_W))
-      move.z = -1 * deltaTime
-    else if (InputManager.isKeyDown(GLFW_KEY_S))
-      move.z = 1 * deltaTime
+      move.z += -1 * deltaTime
+    if (InputManager.isKeyDown(GLFW_KEY_S))
+      move.z += 1 * deltaTime
 
     if (InputManager.isKeyDown(GLFW_KEY_A))
-      move.x = -1 * deltaTime
-    else if (InputManager.isKeyDown(GLFW_KEY_D))
-      move.x = 1 * deltaTime
+      move.x += -1 * deltaTime
+    if (InputManager.isKeyDown(GLFW_KEY_D))
+      move.x += 1 * deltaTime
 
-    val deltaY = InputManager.mousePosition.y - 300
-    val deltaX = InputManager.mousePosition.x - 400
-
-    camera.transform.rotation.x += deltaY * deltaTime * mouseSpeed
-    camera.transform.rotation.y += deltaX * deltaTime * mouseSpeed
-
-    if (camera.transform.rotation.x >= 90f)
-      camera.transform.rotation.x = 90f
-    if (camera.transform.rotation.x <= -90f)
-      camera.transform.rotation.x = -90f
-
-    if (camera.transform.rotation.y >= 360f)
-      camera.transform.rotation.y = 360f
-    if (camera.transform.rotation.y <= -360f)
-      camera.transform.rotation.y = -360f
+    if (InputManager.isKeyDown(GLFW_KEY_SPACE))
+      move.y += 1 * deltaTime
+    if (InputManager.isKeyDown(GLFW_KEY_LEFT_SHIFT))
+      move.y += -1 * deltaTime
 
     camera.move(move)
 
-    glfwSetCursorPos(clockworkEngine.window.handle, (WIDTH / 2).toDouble, (HEIGHT / 2).toDouble)
+    if (lockMouse) {
+      val deltaY = InputManager.mousePosition.y - 300
+      val deltaX = InputManager.mousePosition.x - 400
+
+      camera.transform.rotation.x += deltaY * deltaTime * mouseSpeed
+      camera.transform.rotation.y += deltaX * deltaTime * mouseSpeed
+
+      if (camera.transform.rotation.x >= 90f)
+        camera.transform.rotation.x = 90f
+      if (camera.transform.rotation.x <= -90f)
+        camera.transform.rotation.x = -90f
+
+      if (camera.transform.rotation.y >= 360f)
+        camera.transform.rotation.y = 0
+      if (camera.transform.rotation.y <= -360f)
+        camera.transform.rotation.y = 0
+
+      glfwSetCursorPos(clockworkEngine.window.handle, (WIDTH / 2).toDouble, (HEIGHT / 2).toDouble)
+    }
   }
 
   def terminate(): Unit = {

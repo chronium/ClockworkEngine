@@ -1,4 +1,6 @@
-import org.joml.Vector2f
+import org.joml.{Vector2f, Vector3f}
+import org.lwjgl.system.MemoryStack._
+import org.lwjgl.glfw.GLFW._
 
 import scala.collection.mutable
 
@@ -60,13 +62,20 @@ trait Keyboard {
 trait Mouse {
   self =>
 
-  val _mousePosition: Vector2f = new Vector2f
+  var window: Long = _
 
-  def mousePosition: Vector2f = _mousePosition
+  def mousePosition: Vector2f = {
+    val stack = stackPush
+    val x = stack doubles 1
+    val y = stack doubles 1
 
-  def mousePosition_=(pos: Vector2f): Unit = {
-    _mousePosition.x = pos.x
-    _mousePosition.y = pos.y
+    glfwGetCursorPos(window, x, y)
+
+    val pos = new Vector2f(x get 0 toFloat, y get 0 toFloat)
+
+    stackPop
+
+    pos
   }
 }
 
