@@ -1,16 +1,16 @@
 package Model
 
-import java.nio.{FloatBuffer, ShortBuffer}
+import java.nio.{FloatBuffer, IntBuffer, ShortBuffer}
 
 import VAOHandle.VAOHandle
 import VBOHandlle.VBOHandle
-import VertexTraits.{ColoredTexturedVertex, ColoredVertex}
+import VertexTraits.{ColoredNormalTexturedVertex, ColoredTexturedVertex, ColoredVertex}
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.{GL11, GL15, GL20, GL45}
 
-case class Model[A, B](buffer: FloatBuffer, indices: Array[Short])(setAttribs: => A)(enableAttribs: => B) {
+case class Model[A, B](buffer: FloatBuffer, indices: Array[Int])(setAttribs: => A)(enableAttribs: => B) {
   val indicesCount: Int = indices length
-  val indexBuffer: ShortBuffer = BufferUtils createShortBuffer indices.length
+  val indexBuffer: IntBuffer = BufferUtils createIntBuffer indices.length
   indexBuffer put indices flip
 
   val vao: VAOHandle = Model.newVAO
@@ -30,13 +30,13 @@ case class Model[A, B](buffer: FloatBuffer, indices: Array[Short])(setAttribs: =
     vao bind {
       vboi bind {
         enableAttribs
-        GL11 glDrawElements(GL11 GL_TRIANGLES, indicesCount, GL11 GL_UNSIGNED_SHORT, 0)
+        GL11 glDrawElements(GL11 GL_TRIANGLES, indicesCount, GL11 GL_UNSIGNED_INT, 0)
       }
     }
   }
 }
 
-class VertexColorModel(buffer: FloatBuffer, indices: Array[Short]) extends Model[Unit, Unit](buffer, indices)({
+class VertexColorModel(buffer: FloatBuffer, indices: Array[Int]) extends Model[Unit, Unit](buffer, indices)({
   ColoredVertex setPositionAttribPointer 0
   ColoredVertex setColorAttribPointer 1
 })({
@@ -44,7 +44,7 @@ class VertexColorModel(buffer: FloatBuffer, indices: Array[Short]) extends Model
   GL20 glEnableVertexAttribArray 1
 })
 
-class VertexColorTextureModel(buffer: FloatBuffer, indices: Array[Short]) extends Model[Unit, Unit](buffer, indices)({
+class VertexColorTextureModel(buffer: FloatBuffer, indices: Array[Int]) extends Model[Unit, Unit](buffer, indices)({
   ColoredTexturedVertex setPositionAttribPointer 0
   ColoredTexturedVertex setColorAttribPointer 1
   ColoredTexturedVertex setTextureAttribPointer 2
@@ -52,6 +52,18 @@ class VertexColorTextureModel(buffer: FloatBuffer, indices: Array[Short]) extend
   GL20 glEnableVertexAttribArray 0
   GL20 glEnableVertexAttribArray 1
   GL20 glEnableVertexAttribArray 2
+})
+
+class ColoredNormalTexturedVertexModel(buffer: FloatBuffer, indices: Array[Int]) extends Model[Unit, Unit](buffer, indices)({
+  ColoredNormalTexturedVertex setPositionAttribPointer 0
+  ColoredNormalTexturedVertex setColorAttribPointer 1
+  ColoredNormalTexturedVertex setTextureAttribPointer 2
+  ColoredNormalTexturedVertex setNormalAttribPointer 3
+})({
+  GL20 glEnableVertexAttribArray 0
+  GL20 glEnableVertexAttribArray 1
+  GL20 glEnableVertexAttribArray 2
+  GL20 glEnableVertexAttribArray 3
 })
 
 object Model {

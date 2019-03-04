@@ -60,6 +60,8 @@ object Main extends Clockwork {
     glCullFace(GL_BACK)
     glEnable(GL_CULL_FACE)
 
+    glEnable(GL_DEPTH_TEST)
+
     projection = new Matrix4f perspective(Transform.FOV, WIDTH.toFloat / HEIGHT.toFloat, Transform.Z_NEAR, Transform.Z_FAR)
     setupTexturedQuad()
 
@@ -153,7 +155,7 @@ object Main extends Clockwork {
       new ColoredVertex setXYZ(.5f, -.5f, 0) setRGBA(1, 1, 1, 1),
       new ColoredVertex setXYZ(.5f, .5f, 0) setRGBA(1, 1, 1, 1))
 
-    val indices = Array[Short](
+    val indices = Array[Int](
       0, 1, 2,
       2, 3, 0)
 
@@ -166,17 +168,17 @@ object Main extends Clockwork {
   }
 
   def setupTexturedQuad(): Unit = {
-    val buffer = ColoredTexturedVertex createVertexBuffer(
+    /*val buffer = ColoredTexturedVertex createVertexBuffer(
       new ColoredTexturedVertex setXYZ(-.5f, .5f, 0f) setRGBA(1, 1, 1, 1) setST(0, 1),
       new ColoredTexturedVertex setXYZ(-.5f, -.5f, 0f) setRGBA(1, 1, 1, 1) setST(0, 0),
       new ColoredTexturedVertex setXYZ(.5f, -.5f, 0f) setRGBA(1, 1, 1, 1) setST(1, 0),
       new ColoredTexturedVertex setXYZ(.5f, .5f, 0f) setRGBA(1, 1, 1, 1) setST(1, 1))
 
-    val indices = Array[Short](
+    val indices = Array[Int](
       0, 1, 2,
-      2, 3, 0)
+      2, 3, 0)*/
 
-    model = new VertexColorTextureModel(buffer, indices)
+    model = OBJLoader loadOBJModel "Assets/Models/monkey.obj"
 
     texture = Texture2D createTexture2D "Assets/Textures/WoodFloor22_col.jpg"
 

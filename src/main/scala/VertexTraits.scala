@@ -58,6 +58,22 @@ trait VertexTextureAttribute {
   def getST: Array[Float] = st.clone
 }
 
+trait VertexNormalAttribute {
+  self =>
+  private val nxyz = Array[Float](0, 0, 0)
+
+  def setNXYZ(x: Float, y: Float, z: Float): self.type = {
+    nxyz(0) = x
+    nxyz(1) = y
+    nxyz(2) = z
+    this
+  }
+
+  def putNXYZ(out: FloatBuffer): FloatBuffer = out.put(nxyz)
+
+  def getNXYZ: Array[Float] = nxyz.clone
+}
+
 trait VertexMeta[V1] extends VertexMetaBase {
   type V = V1
 }
@@ -116,6 +132,26 @@ trait VertexTextureMeta {
   def setTextureAttribPointer(index: Int): Unit =
     GL20 glVertexAttribPointer(index, textureInfo numElements, GL11 GL_FLOAT, false, stride, textureInfo byteOffset)
 }
+
+trait VertexNormalMeta {
+  self: VertexMetaBase {type V <: VertexNormalAttribute} =>
+  private val normalInfo = registerAttribute(3, { (v, b) => v.putNXYZ(b) })
+
+  def setNormalAttribPointer(index: Int): Unit =
+    GL20 glVertexAttribPointer(index, normalInfo numElements, GL11 GL_FLOAT, false, stride, normalInfo byteOffset)
+}
+
+class ColoredNormalTexturedVertex
+  extends VertexPositionAttribute
+    with VertexColorAttribute
+    with VertexTextureAttribute
+    with VertexNormalAttribute
+
+object ColoredNormalTexturedVertex extends VertexMeta[ColoredNormalTexturedVertex]
+  with VertexPositionMeta
+  with VertexColorMeta
+  with VertexTextureMeta
+  with VertexNormalMeta
 
 class ColoredTexturedVertex
   extends VertexPositionAttribute
