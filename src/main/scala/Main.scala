@@ -85,10 +85,8 @@ object Main extends Clockwork {
       shader setUniform("tex", 0)
       shader setUniform("projectionMatrix", projection)
       shader setUniform("viewMatrix", camera.transform.cameraMatrix)
-      texture bind {
-        for (renderable <- sceneGraph.get[RenderComponent])
-          renderable.render(shader)
-      }
+      for (renderable <- sceneGraph.get[RenderComponent])
+        renderable.render(shader)
     }
   }
 
@@ -150,9 +148,9 @@ object Main extends Clockwork {
 
   def setupColoredQuad(): Unit = {
     val interleavedBuffer = ColoredVertex createVertexBuffer(
-      new ColoredVertex setXYZ(-.5f, .5f, 0) setRGBA(1, 0, 0, 1),
-      new ColoredVertex setXYZ(-.5f, -.5f, 0) setRGBA(0, 1, 0, 1),
-      new ColoredVertex setXYZ(.5f, -.5f, 0) setRGBA(0, 0, 1, 1),
+      new ColoredVertex setXYZ(-.5f, .5f, 0) setRGBA(1, 1, 1, 1),
+      new ColoredVertex setXYZ(-.5f, -.5f, 0) setRGBA(1, 1, 1, 1),
+      new ColoredVertex setXYZ(.5f, -.5f, 0) setRGBA(1, 1, 1, 1),
       new ColoredVertex setXYZ(.5f, .5f, 0) setRGBA(1, 1, 1, 1))
 
     val indices = Array[Short](
@@ -169,9 +167,9 @@ object Main extends Clockwork {
 
   def setupTexturedQuad(): Unit = {
     val buffer = ColoredTexturedVertex createVertexBuffer(
-      new ColoredTexturedVertex setXYZ(-.5f, .5f, 0f) setRGBA(1, 0, 0, 1) setST(0, 1),
-      new ColoredTexturedVertex setXYZ(-.5f, -.5f, 0f) setRGBA(0, 1, 0, 1) setST(0, 0),
-      new ColoredTexturedVertex setXYZ(.5f, -.5f, 0f) setRGBA(0, 0, 1, 1) setST(1, 0),
+      new ColoredTexturedVertex setXYZ(-.5f, .5f, 0f) setRGBA(1, 1, 1, 1) setST(0, 1),
+      new ColoredTexturedVertex setXYZ(-.5f, -.5f, 0f) setRGBA(1, 1, 1, 1) setST(0, 0),
+      new ColoredTexturedVertex setXYZ(.5f, -.5f, 0f) setRGBA(1, 1, 1, 1) setST(1, 0),
       new ColoredTexturedVertex setXYZ(.5f, .5f, 0f) setRGBA(1, 1, 1, 1) setST(1, 1))
 
     val indices = Array[Short](

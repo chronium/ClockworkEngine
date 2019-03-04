@@ -26,6 +26,8 @@ case class TextureHandle(width: Int, height: Int)(handle: Int, target: Int) {
 }
 
 object Texture2D {
+  val DefaultTexture: TextureHandle = Texture2D createTexture2D "Assets/Textures/Missing.png"
+
   def createTexture2D(path: String): TextureHandle = {
     val handle = GL45 glCreateTextures GL11.GL_TEXTURE_2D
     val (rgba, width, height) = loadImage(path)
