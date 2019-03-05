@@ -1,10 +1,10 @@
 package Model
 
-import java.nio.{FloatBuffer, IntBuffer, ShortBuffer}
+import java.nio.{FloatBuffer, IntBuffer}
 
 import VAOHandle.VAOHandle
 import VBOHandlle.VBOHandle
-import VertexTraits.{ColoredNormalTexturedVertex, ColoredTexturedVertex, ColoredVertex}
+import VertexTraits.{NormalTexturedVertex, ColoredTexturedVertex, ColoredVertex}
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.{GL11, GL15, GL20, GL45}
 
@@ -54,16 +54,14 @@ class VertexColorTextureModel(buffer: FloatBuffer, indices: Array[Int]) extends 
   GL20 glEnableVertexAttribArray 2
 })
 
-class ColoredNormalTexturedVertexModel(buffer: FloatBuffer, indices: Array[Int]) extends Model[Unit, Unit](buffer, indices)({
-  ColoredNormalTexturedVertex setPositionAttribPointer 0
-  ColoredNormalTexturedVertex setColorAttribPointer 1
-  ColoredNormalTexturedVertex setTextureAttribPointer 2
-  ColoredNormalTexturedVertex setNormalAttribPointer 3
+class NormalTexturedVertexModel(buffer: FloatBuffer, indices: Array[Int]) extends Model[Unit, Unit](buffer, indices)({
+  NormalTexturedVertex setPositionAttribPointer 0
+  NormalTexturedVertex setTextureAttribPointer 1
+  NormalTexturedVertex setNormalAttribPointer 2
 })({
   GL20 glEnableVertexAttribArray 0
   GL20 glEnableVertexAttribArray 1
   GL20 glEnableVertexAttribArray 2
-  GL20 glEnableVertexAttribArray 3
 })
 
 object Model {

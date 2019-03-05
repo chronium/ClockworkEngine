@@ -1,5 +1,5 @@
-import Model.{Model, ColoredNormalTexturedVertexModel}
-import VertexTraits.{ColoredNormalTexturedVertex, ColoredTexturedVertex}
+import Model.{Model, NormalTexturedVertexModel}
+import VertexTraits.NormalTexturedVertex
 
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
@@ -32,10 +32,10 @@ object OBJLoader {
   def processBuffers(vert: ArrayBuffer[Vert], texts: ArrayBuffer[Tex], norms: ArrayBuffer[Norm], faces: ArrayBuffer[Face]): Model[Unit, Unit] = {
     val indices: ArrayBuffer[Int] = new ArrayBuffer[Int]
 
-    val verts: ArrayBuffer[ColoredNormalTexturedVertex] = new ArrayBuffer[ColoredNormalTexturedVertex]
+    val verts: ArrayBuffer[NormalTexturedVertex] = new ArrayBuffer[NormalTexturedVertex]
 
     for (pos <- vert) {
-      verts += new ColoredNormalTexturedVertex setXYZ(pos.x, pos.y, pos.z) setRGB(1, 1, 1)
+      verts += new NormalTexturedVertex setXYZ(pos.x, pos.y, pos.z)
     }
 
     for (face <- faces) {
@@ -55,9 +55,9 @@ object OBJLoader {
       }
     }
 
-    val buffer = ColoredNormalTexturedVertex createVertexBuffer (verts: _*)
+    val buffer = NormalTexturedVertex createVertexBuffer (verts: _*)
 
-    new ColoredNormalTexturedVertexModel(buffer, indices toArray)
+    new NormalTexturedVertexModel(buffer, indices toArray)
   }
 
   case class Vert(x: Float, y: Float, z: Float)

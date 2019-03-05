@@ -4,11 +4,12 @@ import Transform.Transform
 import VertexTraits.{ColoredTexturedVertex, ColoredVertex}
 import graph.components.RenderComponent
 import graph.{Entity, SceneGraph}
-import org.joml.{Matrix4f, Vector2f, Vector3f}
+import org.joml.{Matrix4f, Vector2f, Vector3f, Vector4f}
 import org.lwjgl.glfw.Callbacks._
 import org.lwjgl.glfw.GLFW._
 import org.lwjgl.opengl.GL11._
 import org.lwjgl.opengl.GL11
+import rendering.{Attenuation, PointLight}
 import shaders.{FragmentShader, ShaderProgram, ShaderProgramHandle, VertexShader}
 import textures.{Texture2D, TextureHandle}
 
@@ -83,10 +84,24 @@ object Main extends Clockwork {
   override def render(window: Window): Unit = {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
+    val curLight = new PointLight(light.color, new Vector3f(light.position), light.intensity, light.att)
+    val aux = new Vector4f(curLight.position, 1)
+    aux.mul(camera.transform.cameraMatrix)
+    curLight.position.x = aux.x
+    curLight.position.y = aux.y
+    curLight.position.z = aux.z
+
     shader bind {
-      shader setUniform("tex", 0)
       shader setUniform("projectionMatrix", projection)
       shader setUniform("viewMatrix", camera.transform.cameraMatrix)
+      shader setUniform("pointLight", curLight)
+      shader setUniform("ambientLight", new Vector3f(0.15f))
+      shader setUniform("specularPower", 10f)
+      shader setUniform("material.ambient", new Vector4f(1))
+      shader setUniform("material.diffuse", new Vector4f(1))
+      shader setUniform("material.specular", new Vector4f(1))
+      shader setUniform("material.hasTexture", 1)
+      shader setUniform("material.reflectance", 1f)
       for (renderable <- sceneGraph.get[RenderComponent])
         renderable.render(shader)
     }
@@ -146,7 +161,7 @@ object Main extends Clockwork {
   var model: Model[Unit, Unit] = _
   var shader: ShaderProgramHandle = _
   var texture: TextureHandle = _
-  var transform: Transform = new Transform(position = new Vector3f(0, 0, -1))
+  var transform: Transform = new Transform(position = new Vector3f(0, 0, -2))
 
   def setupColoredQuad(): Unit = {
     val interleavedBuffer = ColoredVertex createVertexBuffer(
@@ -167,6 +182,8 @@ object Main extends Clockwork {
     shader = ShaderProgram(vert, frag) bindAttribLocations((0, "vPos"), (1, "vColor")) build
   }
 
+  var light: PointLight = _
+
   def setupTexturedQuad(): Unit = {
     /*val buffer = ColoredTexturedVertex createVertexBuffer(
       new ColoredTexturedVertex setXYZ(-.5f, .5f, 0f) setRGBA(1, 1, 1, 1) setST(0, 1),
@@ -182,9 +199,12 @@ object Main extends Clockwork {
 
     texture = Texture2D createTexture2D "Assets/Textures/WoodFloor22_col.jpg"
 
-    val vert = VertexShader |:| "Assets/Shaders/vsTextured.glsl"
-    val frag = FragmentShader |:| "Assets/Shaders/fsTextured.glsl"
+    val vert = VertexShader |:| "Assets/Shaders/vsLit.glsl"
+    val frag = FragmentShader |:| "Assets/Shaders/fsLit.glsl"
 
-    shader = ShaderProgram(vert, frag) bindAttribLocations((0, "vPos"), (1, "vColor")) build
+    shader = ShaderProgram(vert, frag) bindAttribLocations((0, "vPos"), (1, "vTexCoord"), (2, "vNormal")) build
+
+    val atten = new Attenuation(0, 0, 1)
+    light = new PointLight(new Vector3f(1), new Vector3f(0, 0, 1), 2.0f, atten)
   }
 }

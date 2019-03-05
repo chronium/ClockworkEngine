@@ -141,15 +141,13 @@ trait VertexNormalMeta {
     GL20 glVertexAttribPointer(index, normalInfo numElements, GL11 GL_FLOAT, false, stride, normalInfo byteOffset)
 }
 
-class ColoredNormalTexturedVertex
+class NormalTexturedVertex
   extends VertexPositionAttribute
-    with VertexColorAttribute
     with VertexTextureAttribute
     with VertexNormalAttribute
 
-object ColoredNormalTexturedVertex extends VertexMeta[ColoredNormalTexturedVertex]
+object NormalTexturedVertex extends VertexMeta[NormalTexturedVertex]
   with VertexPositionMeta
-  with VertexColorMeta
   with VertexTextureMeta
   with VertexNormalMeta
 

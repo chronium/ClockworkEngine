@@ -2,9 +2,10 @@ package shaders
 
 import java.nio.FloatBuffer
 
-import org.joml.Matrix4f
+import org.joml.{Matrix4f, Vector3f, Vector4f}
 import org.lwjgl.system.MemoryStack._
 import org.lwjgl.opengl.{GL11, GL20}
+import rendering.{Attenuation, PointLight}
 
 import scala.collection.mutable
 import scala.io.Source
@@ -71,6 +72,39 @@ case class ShaderProgramHandle(shaders: Array[Int], handle: Int) {
     if (!uniforms.contains(uniform))
       uniforms += (uniform -> GL20.glGetUniformLocation(handle, uniform))
     GL20 glUniform1i(uniforms(uniform), value)
+  }
+
+  def setUniform(uniform: String, value: Float): Unit = {
+    if (!uniforms.contains(uniform))
+      uniforms += (uniform -> GL20.glGetUniformLocation(handle, uniform))
+    GL20 glUniform1f(uniforms(uniform), value)
+  }
+
+  def setUniform(uniform: String, value: Vector4f): Unit = {
+    if (!uniforms.contains(uniform))
+      uniforms += (uniform -> GL20.glGetUniformLocation(handle, uniform))
+
+    GL20 glUniform4f(uniforms(uniform), value.x, value.y, value.z, value.w)
+  }
+
+  def setUniform(uniform: String, value: Vector3f): Unit = {
+    if (!uniforms.contains(uniform))
+      uniforms += (uniform -> GL20.glGetUniformLocation(handle, uniform))
+
+    GL20 glUniform3f(uniforms(uniform), value.x, value.y, value.z)
+  }
+
+  def setUniform(uniform: String, value: Attenuation): Unit = {
+    setUniform(s"$uniform.constant", value.constant)
+    setUniform(s"$uniform.linear", value.linear)
+    setUniform(s"$uniform.exponent", value.exponent)
+  }
+
+  def setUniform(uniform: String, value: PointLight): Unit = {
+    setUniform(s"$uniform.color", value.color)
+    setUniform(s"$uniform.position", value.position)
+    setUniform(s"$uniform.intensity", value.intensity)
+    setUniform(s"$uniform.att", value.att)
   }
 
   def setUniform(uniform: String, value: Matrix4f): Unit = {
