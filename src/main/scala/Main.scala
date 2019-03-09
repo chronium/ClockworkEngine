@@ -84,12 +84,7 @@ object Main extends Clockwork {
   override def render(window: Window): Unit = {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-    val curLight = new PointLight(light.color, new Vector3f(light.position), light.intensity, light.att)
-    val aux = new Vector4f(curLight.position, 1)
-    aux.mul(camera.transform.cameraMatrix)
-    curLight.position.x = aux.x
-    curLight.position.y = aux.y
-    curLight.position.z = aux.z
+    val curLight = light.intoView(camera.transform.cameraMatrix)
 
     shader bind {
       shader setUniform("projectionMatrix", projection)
@@ -97,11 +92,6 @@ object Main extends Clockwork {
       shader setUniform("pointLight", curLight)
       shader setUniform("ambientLight", new Vector3f(0.15f))
       shader setUniform("specularPower", 10f)
-      shader setUniform("material.ambient", new Vector4f(1))
-      shader setUniform("material.diffuse", new Vector4f(1))
-      shader setUniform("material.specular", new Vector4f(1))
-      shader setUniform("material.hasTexture", 1)
-      shader setUniform("material.reflectance", 1f)
       for (renderable <- sceneGraph.get[RenderComponent])
         renderable.render(shader)
     }

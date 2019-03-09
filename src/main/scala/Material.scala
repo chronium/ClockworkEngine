@@ -1,11 +1,35 @@
 package Material
 
+import org.joml.Vector4f
 import shaders.ShaderProgramHandle
 import textures.{Texture2D, TextureHandle}
 
-case class Material(diffuse: TextureHandle = Texture2D.DefaultTexture) {
-  def bind[T](body: => T)(shader: ShaderProgramHandle): Unit = {
+trait MaterialType {
+  def bind[T](body: => T)(location: String, shader: ShaderProgramHandle): Unit
+}
+
+case class FlatColorMaterial(ambient: Vector4f = new Vector4f(1), diffuse: Vector4f = new Vector4f(1), specular: Vector4f = new Vector4f(1)) extends MaterialType {
+  override def bind[T](body: => T)(location: String, shader: ShaderProgramHandle): Unit = {
+    shader setUniform(s"$location.ambient", ambient)
+    shader setUniform(s"$location.diffuse", diffuse)
+    shader setUniform(s"$location.specular", specular)
+    body
+  }
+}
+
+case class TexturedMaterial(diffuse: TextureHandle = Texture2D.DefaultTexture) extends MaterialType {
+  override def bind[T](body: => T)(location: String, shader: ShaderProgramHandle): Unit = {
     shader setUniform("texture_sampler", 0)
-    diffuse bind body
+    shader setUniform(s"$location.hasTexture", 1)
+    diffuse bind(0, body)
+  }
+}
+
+case class Material(material: MaterialType, reflectance: Float = 1f) {
+  def bind[T](body: => T)(shader: ShaderProgramHandle): Unit = {
+    shader setUniform("material.reflectance", 1f)
+    material.bind({
+      body
+    })("material", shader)
   }
 }
