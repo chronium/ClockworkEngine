@@ -5,7 +5,7 @@ import java.nio.FloatBuffer
 import org.joml.{Matrix4f, Vector3f, Vector4f}
 import org.lwjgl.system.MemoryStack._
 import org.lwjgl.opengl.{GL11, GL20}
-import rendering.{Attenuation, PointLight}
+import rendering.{Attenuation, Color, PointLight}
 
 import scala.collection.mutable
 import scala.io.Source
@@ -92,6 +92,13 @@ case class ShaderProgramHandle(shaders: Array[Int], handle: Int) {
       uniforms += (uniform -> GL20.glGetUniformLocation(handle, uniform))
 
     GL20 glUniform3f(uniforms(uniform), value.x, value.y, value.z)
+  }
+
+  def setUniform(uniform: String, value: Color): Unit = {
+    if (!uniforms.contains(uniform))
+      uniforms += (uniform -> GL20.glGetUniformLocation(handle, uniform))
+
+    GL20 glUniform4f(uniforms(uniform), value.r, value.g, value.b, value.a)
   }
 
   def setUniform(uniform: String, value: Attenuation): Unit = {

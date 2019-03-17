@@ -1,6 +1,7 @@
 package Material
 
 import org.joml.Vector4f
+import rendering.Color
 import shaders.ShaderProgramHandle
 import textures.{Texture2D, TextureHandle}
 
@@ -8,7 +9,7 @@ trait MaterialType {
   def bind[T](body: => T)(location: String, shader: ShaderProgramHandle): Unit
 }
 
-case class FlatColorMaterial(ambient: Vector4f = new Vector4f(1), diffuse: Vector4f = new Vector4f(1), specular: Vector4f = new Vector4f(1)) extends MaterialType {
+case class FlatColorMaterial(ambient: Color = Color.White, diffuse: Color = Color.White, specular: Color = Color.White) extends MaterialType {
   override def bind[T](body: => T)(location: String, shader: ShaderProgramHandle): Unit = {
     shader setUniform(s"$location.ambient", ambient)
     shader setUniform(s"$location.diffuse", diffuse)
@@ -33,3 +34,4 @@ case class Material(material: MaterialType, reflectance: Float = 1f) {
     })("material", shader)
   }
 }
+

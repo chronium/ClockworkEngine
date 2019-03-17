@@ -3,13 +3,14 @@ import Model._
 import Transform.Transform
 import VertexTraits.{ColoredTexturedVertex, ColoredVertex}
 import graph.components.RenderComponent
+import graph.toml.{MaterialParser, TomlParser}
 import graph.{Entity, SceneGraph}
 import org.joml.{Matrix4f, Vector2f, Vector3f, Vector4f}
 import org.lwjgl.glfw.Callbacks._
 import org.lwjgl.glfw.GLFW._
 import org.lwjgl.opengl.GL11._
 import org.lwjgl.opengl.GL11
-import rendering.{Attenuation, PointLight}
+import rendering.{Attenuation, Color, PointLight}
 import shaders.{FragmentShader, ShaderProgram, ShaderProgramHandle, VertexShader}
 import textures.{Texture2D, TextureHandle}
 
@@ -66,7 +67,9 @@ object Main extends Clockwork {
     projection = new Matrix4f perspective(Transform.FOV, WIDTH.toFloat / HEIGHT.toFloat, Transform.Z_NEAR, Transform.Z_FAR)
     setupTexturedQuad()
 
-    glClearColor(100.0f / 255.0f, 149.0f / 255.0f, 237.0f / 255.0f, 0.0f)
+    val clearColor = Color.CornflowerBlue
+
+    glClearColor(clearColor r, clearColor g, clearColor b, 0.0f)
 
     sceneGraph = new SceneGraph
 
@@ -76,9 +79,12 @@ object Main extends Clockwork {
     val entity = new TestEntity()
     entity :< new RenderComponent
     entity[RenderComponent].get.model = model
+    entity[RenderComponent].get.material = MaterialParser :< "Assets/Scenes/Materials/flat_white.toml"
     entity.transform = transform
 
     sceneGraph += entity
+
+    println(s"${TomlParser.toml_data.toString}")
   }
 
   override def render(window: Window): Unit = {
