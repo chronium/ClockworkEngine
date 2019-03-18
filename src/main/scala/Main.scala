@@ -3,8 +3,8 @@ import Model._
 import Transform.Transform
 import VertexTraits.{ColoredTexturedVertex, ColoredVertex}
 import graph.components.RenderComponent
-import graph.toml.{MaterialParser, TomlParser}
-import graph.{Entity, SceneGraph}
+import graph.toml.{MaterialParser, ObjectParser, SceneParser}
+import graph.{BaseEntity, Entity, SceneGraph}
 import org.joml.{Matrix4f, Vector2f, Vector3f, Vector4f}
 import org.lwjgl.glfw.Callbacks._
 import org.lwjgl.glfw.GLFW._
@@ -67,24 +67,9 @@ object Main extends Clockwork {
     projection = new Matrix4f perspective(Transform.FOV, WIDTH.toFloat / HEIGHT.toFloat, Transform.Z_NEAR, Transform.Z_FAR)
     setupTexturedQuad()
 
-    val clearColor = Color.CornflowerBlue
+    sceneGraph = SceneParser :< "Assets/Scenes/scene.toml"
 
-    glClearColor(clearColor r, clearColor g, clearColor b, 0.0f)
-
-    sceneGraph = new SceneGraph
-
-    class TestEntity extends Entity {
-    }
-
-    val entity = new TestEntity()
-    entity :< new RenderComponent
-    entity[RenderComponent].get.model = model
-    entity[RenderComponent].get.material = MaterialParser :< "Assets/Scenes/Materials/flat_white.toml"
-    entity.transform = transform
-
-    sceneGraph += entity
-
-    println(s"${TomlParser.toml_data.toString}")
+    glClearColor(sceneGraph.clearColor r, sceneGraph.clearColor g, sceneGraph.clearColor b, 0.0f)
   }
 
   override def render(window: Window): Unit = {
@@ -96,8 +81,8 @@ object Main extends Clockwork {
       shader setUniform("projectionMatrix", projection)
       shader setUniform("viewMatrix", camera.transform.cameraMatrix)
       shader setUniform("pointLight", curLight)
-      shader setUniform("ambientLight", new Vector3f(0.15f))
-      shader setUniform("specularPower", 10f)
+      shader setUniform("ambientLight", sceneGraph.ambientColor)
+      shader setUniform("specularPower", sceneGraph.specular_power)
       for (renderable <- sceneGraph.get[RenderComponent])
         renderable.render(shader)
     }
@@ -154,47 +139,12 @@ object Main extends Clockwork {
     glfwSetErrorCallback(null).free()
   }
 
-  var model: Model[Unit, Unit] = _
   var shader: ShaderProgramHandle = _
-  var texture: TextureHandle = _
   var transform: Transform = new Transform(position = new Vector3f(0, 0, -2))
-
-  def setupColoredQuad(): Unit = {
-    val interleavedBuffer = ColoredVertex createVertexBuffer(
-      new ColoredVertex setXYZ(-.5f, .5f, 0) setRGBA(1, 1, 1, 1),
-      new ColoredVertex setXYZ(-.5f, -.5f, 0) setRGBA(1, 1, 1, 1),
-      new ColoredVertex setXYZ(.5f, -.5f, 0) setRGBA(1, 1, 1, 1),
-      new ColoredVertex setXYZ(.5f, .5f, 0) setRGBA(1, 1, 1, 1))
-
-    val indices = Array[Int](
-      0, 1, 2,
-      2, 3, 0)
-
-    model = new VertexColorModel(interleavedBuffer, indices)
-
-    val vert = VertexShader |:| "Assets/Shaders/passthrough.vs"
-    val frag = FragmentShader |:| "Assets/Shaders/passthrough.fs"
-
-    shader = ShaderProgram(vert, frag) bindAttribLocations((0, "vPos"), (1, "vColor")) build
-  }
 
   var light: PointLight = _
 
   def setupTexturedQuad(): Unit = {
-    /*val buffer = ColoredTexturedVertex createVertexBuffer(
-      new ColoredTexturedVertex setXYZ(-.5f, .5f, 0f) setRGBA(1, 1, 1, 1) setST(0, 1),
-      new ColoredTexturedVertex setXYZ(-.5f, -.5f, 0f) setRGBA(1, 1, 1, 1) setST(0, 0),
-      new ColoredTexturedVertex setXYZ(.5f, -.5f, 0f) setRGBA(1, 1, 1, 1) setST(1, 0),
-      new ColoredTexturedVertex setXYZ(.5f, .5f, 0f) setRGBA(1, 1, 1, 1) setST(1, 1))
-
-    val indices = Array[Int](
-      0, 1, 2,
-      2, 3, 0)*/
-
-    model = OBJLoader loadOBJModel "Assets/Models/monkey.obj"
-
-    texture = Texture2D createTexture2D "Assets/Textures/WoodFloor22_col.jpg"
-
     val vert = VertexShader |:| "Assets/Shaders/vsLit.glsl"
     val frag = FragmentShader |:| "Assets/Shaders/fsLit.glsl"
 

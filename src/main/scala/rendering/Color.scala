@@ -1,13 +1,13 @@
 package rendering
 
-case class Color(r: Float, g: Float, b: Float, a: Float) {
+case class Color(r: Float, g: Float, b: Float, a: Float = 1.0f) {
 }
 
 case object Color {
   private implicit def hex2float(hex: String): Float = Integer.parseInt(hex, 16).toFloat
 
   def RGB(r: Float, g: Float, b: Float): Color = {
-    Color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f)
+    Color(r / 255.0f, g / 255.0f, b / 255.0f)
   }
 
   def RGBA(r: Float, g: Float, b: Float, a: Float): Color = {

@@ -1,4 +1,8 @@
+# Tyoe of material
 [flat_color]
-  ambient = [1.0, 1.0, 1.0]
-  diffuse = [1.0, 1.0, 1.0]
-  specular = [1.0, 1.0, 1.0]
+    # Ambient Color
+    ambient = [1.0, 1.0, 1.0]
+    # Diffuse Color
+    diffuse = [1.0, 1.0, 1.0]
+    # Specular Color
+    specular = [1.0, 1.0, 1.0]

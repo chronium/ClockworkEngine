@@ -1,3 +1,5 @@
+package OBJLoader
+
 import Model.{Model, NormalTexturedVertexModel}
 import VertexTraits.NormalTexturedVertex
 

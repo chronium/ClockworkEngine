@@ -39,3 +39,5 @@ trait Entity {
     None
   }
 }
+
+class BaseEntity extends Entity

@@ -8,7 +8,7 @@ libraryDependencies += "org.joml" % "joml" % "1.9.12"
 
 libraryDependencies ++= {
   val version = "3.1.6"
-  val os = "windows"
+  val os = sys.props("os.name").toLowerCase.split(' ')(0)
 
   Seq(
     "lwjgl",
@@ -26,3 +26,5 @@ libraryDependencies ++= {
 }
 
 libraryDependencies += "tech.sparse" %% "toml-scala" % "0.2.0"
+
+scalacOptions += "-language:postfixOps"

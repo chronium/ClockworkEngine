@@ -1,0 +1,6 @@
+# Type of object.
+[static_object]
+    # Object's model path
+    model = "Models/cube.obj"
+    # Object's material path
+    material = "Scenes/Materials/flat_white.toml"
